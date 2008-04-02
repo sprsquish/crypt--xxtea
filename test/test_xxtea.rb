@@ -1,7 +1,7 @@
 $:.unshift File.dirname(__FILE__) + '/../lib'
 
 require 'test/unit'
-require 'crypt'
+require 'crypt_tea'
 
 class XXTEATest < Test::Unit::TestCase
   def setup
