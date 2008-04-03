@@ -2,6 +2,7 @@ History.txt
 Manifest.txt
 README.txt
 Rakefile
+bin/xxtea
 lib/crypt_tea.rb
 lib/crypt_tea/xxtea.rb
 test/test_xxtea.rb
