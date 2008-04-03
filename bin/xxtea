@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+
+unless (ARGV.length == 3) && (command = ARGV[0][/^enc/] ? :encrypt : (ARGV[0][/^dec/] ? :decrypt : nil))
+  puts '  Usage:'
+  puts "    #{$0} <command> <key> <plaintext/cyphertext>"
+  puts
+  puts "  Commands:"
+  puts "    enc, encrypt"
+  puts "    dec, decrypt"
+  puts
+else
+  require 'rubygems'
+  require 'crypt_tea'
+
+  k = Crypt::XXTEA.new(ARGV[1].dup)
+  puts k.send(command, ARGV[2].dup)
+end
