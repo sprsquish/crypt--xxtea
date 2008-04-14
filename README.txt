@@ -7,9 +7,6 @@
   An implementation of the Tiny Encryption Algorithm that's
   compatible with PHP's xxTEA
 
-== SYNOPSIS:
-
-
 == REQUIREMENTS:
 
 * rubygems
