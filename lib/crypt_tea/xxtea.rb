@@ -43,8 +43,8 @@ module Crypt
 
 
     def self.int32(n)
-      n -= 4294967296 while (n >= 2147483648)
-      n += 4294967296 while (n <= -2147483649)
+      n -= 4_294_967_296 while (n >= 2_147_483_648)
+      n += 4_294_967_296 while (n <= -2_147_483_648)
       n.to_i
     end
 
@@ -52,6 +52,12 @@ module Crypt
       self.class.int32 n
     end
 
+    def mx(z, y, sum, p, e)
+      int32(
+        ((z >> 5 & 0x07FFFFFF) ^ (y << 2)) +
+        ((y >> 3 & 0x1FFFFFFF) ^ (z << 4))
+      ) ^ int32((sum ^ y) + (@key[(p & 3) ^ e] ^ z))
+    end
 
     def encrypt(plaintext)
       return '' if plaintext.length == 0
@@ -63,7 +69,7 @@ module Crypt
 
       z = v[n]
       y = v[0]
-      q = (6 + 52/ (n + 1)).floor
+      q = (6 + 52 / (n + 1)).floor
       sum = 0
       p = 0
 
@@ -71,26 +77,14 @@ module Crypt
         sum = int32(sum + DELTA)
         e = sum >> 2 & 3
 
-        (0...n).each do |p|
+        n.times do |p|
           y = v[p + 1];
-          mx =
-            int32(
-              ((z >> 5 & 0x07FFFFFF) ^ y << 2) +
-              ((y >> 3 & 0x1FFFFFFF) ^ z << 4)
-            ) ^ int32((sum ^ y) + (@key[p & 3 ^ e] ^ z))
-
-          z = v[p] = int32(v[p] + mx)
+          z = v[p] = int32(v[p] + mx(z, y, sum, p, e))
         end
 
         p += 1
         y = v[0];
-        mx =
-          int32(
-            ((z >> 5 & 0x07FFFFFF) ^ y << 2) +
-            ((y >> 3 & 0x1FFFFFFF) ^ z << 4)
-          ) ^ int32((sum ^ y) + (@key[p & 3 ^ e] ^ z))
-
-        z = v[p] = int32(v[p] + mx)
+        z = v[p] = int32(v[p] + mx(z, y, sum, p, e))
       end
 
       longs_to_str(v).unpack('a*').pack('m').delete("\n") # base64 encode it without newlines
@@ -114,24 +108,12 @@ module Crypt
         e = sum >> 2 & 3
         n.downto(1) do |p|
           z = v[p - 1]
-          mx =
-            int32(
-              ((z >> 5 & 0x07FFFFFF) ^ y << 2) +
-              ((y >> 3 & 0x1FFFFFFF) ^ z << 4)
-            ) ^ int32((sum ^ y) + (@key[p & 3 ^ e] ^ z))
-
-          y = v[p] = int32(v[p] - mx)
+          y = v[p] = int32(v[p] - mx(z, y, sum, p, e))
         end
 
         p -= 1
         z = v[n]
-        mx =
-          int32(
-            ((z >> 5 & 0x07FFFFFF) ^ y << 2) +
-            ((y >> 3 & 0x1FFFFFFF) ^ z << 4)
-          ) ^ int32((sum ^ y) + (@key[p & 3 ^ e] ^ z))
-
-        y = v[0] = int32(v[0] - mx)
+        y = v[0] = int32(v[0] - mx(z, y, sum, p, e))
         sum = int32(sum - DELTA)
       end
 
