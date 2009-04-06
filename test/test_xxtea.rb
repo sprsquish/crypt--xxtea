@@ -5,7 +5,9 @@ require 'crypt_tea'
 
 class XXTEATest < Test::Unit::TestCase
   def setup
-    @key = Crypt::XXTEA.new 'testkey'
+    @key = Crypt::XXTEA.new 'abigfattestkey'
+    @plaintext = "Oh say can you see, by the dawn's early light"
+    @cyphertext = "V32cYZc5yLXepm9lxzr4kgGM/eSVurwV0yQWi4uFs0uB2UBlJ19ZRKKMkbMr7DLGc3n1XQ=="
   end
 
   def test_str_to_long
@@ -22,10 +24,17 @@ class XXTEATest < Test::Unit::TestCase
   end
 
   def test_encrypt
-    assert_equal 'qYkeGc3ignEvPGM7RS06iQ==', @key.encrypt('plaintext')
+    assert_equal @cyphertext, @key.encrypt(@plaintext)
   end
 
   def test_decrypt
-    assert_equal 'plaintext', @key.decrypt('qYkeGc3ignEvPGM7RS06iQ==')
+    assert_equal @plaintext, @key.decrypt(@cyphertext)
+  end
+
+  def test_different_size_plaintext
+    assert_equal '123', @key.decrypt(@key.encrypt('123'))
+    assert_equal '1234567890', @key.decrypt(@key.encrypt('1234567890'))
+    assert_equal 'abcdefghijklmnopqrstuvwxyz', @key.decrypt(@key.encrypt('abcdefghijklmnopqrstuvwxyz'))
+    assert_equal '12345678901234567890123456789012', @key.decrypt(@key.encrypt('12345678901234567890123456789012'))
   end
 end
