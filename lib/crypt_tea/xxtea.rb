@@ -1,6 +1,6 @@
 module Crypt
   class XXTEA
-    VERSION = '1.0.0'
+    VERSION = '1.1.0'
     DELTA = 0x9E3779B9
 
     def initialize(new_key)

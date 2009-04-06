@@ -1,3 +1,11 @@
+=== 1.1.0 / 2009-04-06
+
+* BUGFIX
+
+  * ensure extra characters on the end of decrypted strings are removed
+  * Thanks to James Zhang for reporting this
+
+
 === 1.0.0 / 2008-04-02
 
 * 1 major enhancement
