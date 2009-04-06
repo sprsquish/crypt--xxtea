@@ -31,14 +31,16 @@ module Crypt
     end
 
 
-    def self.longs_to_str(l, unpad = false)   # convert array of longs back to string
+    ##
+    # convert array of longs back to string
+    def self.longs_to_str(l, count_included = false)
       s = l.pack('V*')
-      s = s.gsub(/[\000-\037]/,'') if unpad
+      s = s[0...(l[-1])] if count_included
       s
     end
 
-    def longs_to_str(l, unpad = false)
-      self.class.longs_to_str l, unpad
+    def longs_to_str(l, count_included = false)
+      self.class.longs_to_str l, count_included
     end
 
 

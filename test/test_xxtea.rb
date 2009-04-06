@@ -11,11 +11,11 @@ class XXTEATest < Test::Unit::TestCase
   end
 
   def test_str_to_long
-    assert_equal [1953719668, 6778473], Crypt::XXTEA.str_to_longs('testing')
+    assert_equal [1953719668, 6778473, 7], Crypt::XXTEA.str_to_longs('testing', true)
   end
 
   def test_longs_to_str
-    assert_equal 'testing', Crypt::XXTEA.longs_to_str([1953719668, 6778473], true)
+    assert_equal 'testing', Crypt::XXTEA.longs_to_str([1953719668, 6778473, 7], true)
   end
 
   def test_key_length
@@ -31,10 +31,12 @@ class XXTEATest < Test::Unit::TestCase
     assert_equal @plaintext, @key.decrypt(@cyphertext)
   end
 
-  def test_different_size_plaintext
-    assert_equal '123', @key.decrypt(@key.encrypt('123'))
-    assert_equal '1234567890', @key.decrypt(@key.encrypt('1234567890'))
-    assert_equal 'abcdefghijklmnopqrstuvwxyz', @key.decrypt(@key.encrypt('abcdefghijklmnopqrstuvwxyz'))
-    assert_equal '12345678901234567890123456789012', @key.decrypt(@key.encrypt('12345678901234567890123456789012'))
+  def test_tiny_plaintext
+    assert_equal '1', @key.decrypt(@key.encrypt('1'))
+  end
+
+  def test_huge_plaintext
+    str = '1234567890' * 1_000
+    assert_equal str, @key.decrypt(@key.encrypt(str))
   end
 end
