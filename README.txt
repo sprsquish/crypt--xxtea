@@ -1,6 +1,6 @@
 = Crypt::XXTEA
 
-* http://github.com/sprsquish/rubytea
+* http://github.com/sprsquish/crypt--xxtea
 
 == DESCRIPTION:
 
