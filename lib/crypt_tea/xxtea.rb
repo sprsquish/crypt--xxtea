@@ -1,6 +1,6 @@
 module Crypt
   class XXTEA
-    VERSION = '1.1.0'
+    VERSION = '1.2.0'
     DELTA = 0x9E3779B9
 
     def initialize(new_key)
@@ -79,9 +79,10 @@ module Crypt
         sum = int32(sum + DELTA)
         e = sum >> 2 & 3
 
-        n.times do |p|
-          y = v[p + 1];
-          z = v[p] = int32(v[p] + mx(z, y, sum, p, e))
+        n.times do |i|
+          y = v[i + 1];
+          z = v[i] = int32(v[i] + mx(z, y, sum, i, e))
+          p = i
         end
 
         p += 1
@@ -108,9 +109,10 @@ module Crypt
 
       while (sum != 0) do
         e = sum >> 2 & 3
-        n.downto(1) do |p|
-          z = v[p - 1]
-          y = v[p] = int32(v[p] - mx(z, y, sum, p, e))
+        n.downto(1) do |i|
+          z = v[i - 1]
+          y = v[i] = int32(v[i] - mx(z, y, sum, i, e))
+          p = i
         end
 
         p -= 1
