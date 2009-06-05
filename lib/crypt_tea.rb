@@ -1,2 +1,1 @@
-$:.unshift File.dirname(__FILE__)
-require 'crypt_tea/xxtea'
+require File.join(File.dirname(__FILE__), *%w[crypt_tea xxtea])
