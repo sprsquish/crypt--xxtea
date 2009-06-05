@@ -1,17 +1,56 @@
+require 'rubygems'
 require 'benchmark'
+require File.join(File.dirname(__FILE__), *%w[.. lib crypt_tea])
 
-$:.unshift File.dirname(__FILE__) + '/../lib'
-require 'crypt_tea'
+KEY = Crypt::XXTEA.new 'abigfattestkey'
+STRINGS = {}
 
-GC.disable
-
-@key = Crypt::XXTEA.new 'abigfattestkey'
+CHARS = [('a'..'z'),('A'..'Z'),('0'..'9')].map{|i| i.to_a}.flatten
+def rand_string(size)
+  (0...size).map { CHARS[rand(CHARS.length)] }.join
+end
 
 Benchmark.bm do |x|
-  x.report('1') { str = '1'; @key.decrypt(@key.encrypt(str)) }
-  x.report('10') { str = '1' * 10; @key.decrypt(@key.encrypt(str)) }
-  x.report('100') { str = '1' * 100; @key.decrypt(@key.encrypt(str)) }
-  x.report('1_000') { str = '1' * 1_000; @key.decrypt(@key.encrypt(str)) }
-  x.report('10_000') { str = '1' * 10_000; @key.decrypt(@key.encrypt(str)) }
-  x.report('100_000') { str = '1' * 100_000; @key.decrypt(@key.encrypt(str)) }
+  [1, 10, 100, 1_000, 10_000, 100_000].each do |size|
+    STRINGS[size] = rand_string(size)
+    x.report(size.to_s.rjust(6)) { KEY.decrypt(KEY.encrypt(STRINGS[size])) }
+  end
 end
+
+__END__
+
+Ruby 1.8.6
+        user       system     total    real
+     1  0.000000   0.000000   0.000000 (  0.002733)
+    10  0.000000   0.000000   0.000000 (  0.003002)
+   100  0.010000   0.010000   0.020000 (  0.007730)
+  1000  0.070000   0.000000   0.070000 (  0.077805)
+ 10000  0.720000   0.010000   0.730000 (  0.738411)
+100000  7.780000   0.040000   7.820000 (  7.932519)
+
+Ruby 1.9.1p129
+        user       system     total    real
+     1  0.010000   0.000000   0.010000 (  0.013437)
+    10  0.000000   0.000000   0.000000 (  0.001345)
+   100  0.000000   0.000000   0.000000 (  0.003279)
+  1000  0.040000   0.000000   0.040000 (  0.040562)
+ 10000  0.390000   0.010000   0.400000 (  0.402591)
+100000  3.170000   0.020000   3.190000 (  3.243170)
+
+jRuby 1.2.0
+        user       system     total    real
+     1  0.026000   0.000000   0.026000 (  0.026000)
+    10  0.018000   0.000000   0.018000 (  0.018000)
+   100  0.040000   0.000000   0.040000 (  0.040000)
+  1000  0.220000   0.000000   0.220000 (  0.220000)
+ 10000  0.682000   0.000000   0.682000 (  0.682000)
+100000  1.281000   0.000000   1.281000 (  1.281000)
+
+jRuby 1.3.0RC2
+        user       system     total    real
+     1  0.026000   0.000000   0.026000 (  0.025000)
+    10  0.020000   0.000000   0.020000 (  0.020000)
+   100  0.040000   0.000000   0.040000 (  0.041000)
+  1000  0.255000   0.000000   0.255000 (  0.254000)
+ 10000  0.499000   0.000000   0.499000 (  0.500000)
+100000  1.805000   0.000000   1.805000 (  1.806000)
