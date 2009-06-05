@@ -1,6 +1,5 @@
 module Crypt
   class XXTEA
-    VERSION = '1.2.0'
     DELTA = 0x9E3779B9
 
     def initialize(new_key)
@@ -18,7 +17,8 @@ module Crypt
       end
     end
 
-    def self.str_to_longs(s, include_count = false)
+    def self.str_to_longs(s, include_count = false) # :nodoc:
+      s = s.dup
       length = s.length
       ((4 - s.length % 4) & 3).times { s << "\0" } # Pad to a multiple of 4
       unpacked = s.unpack('V*').collect { |n| int32 n }
@@ -26,41 +26,49 @@ module Crypt
       unpacked
     end
 
-    def str_to_longs(s, include_count = false)
+    def str_to_longs(s, include_count = false) # :nodoc:
       self.class.str_to_longs s, include_count
     end
 
 
     ##
     # convert array of longs back to string
-    def self.longs_to_str(l, count_included = false)
+    def self.longs_to_str(l, count_included = false) # :nodoc:
       s = l.pack('V*')
       s = s[0...(l[-1])] if count_included
       s
     end
 
-    def longs_to_str(l, count_included = false)
+    def longs_to_str(l, count_included = false) # :nodoc:
       self.class.longs_to_str l, count_included
     end
 
 
-    def self.int32(n)
+    def self.int32(n) # :nodoc:
       n -= 4_294_967_296 while (n >= 2_147_483_648)
       n += 4_294_967_296 while (n <= -2_147_483_648)
       n.to_i
     end
 
-    def int32(n)
+    def int32(n) # :nodoc:
       self.class.int32 n
     end
 
-    def mx(z, y, sum, p, e)
+    def mx(z, y, sum, p, e) # :nodoc:
       int32(
         ((z >> 5 & 0x07FFFFFF) ^ (y << 2)) +
         ((y >> 3 & 0x1FFFFFFF) ^ (z << 4))
       ) ^ int32((sum ^ y) + (@key[(p & 3) ^ e] ^ z))
     end
 
+    ##
+    # Encrypt the +plaintext+ using the +key+
+    def self.encrypt(key, plaintext)
+      self.new(key).encrypt(plaintext)
+    end
+
+    ##
+    # Encrypt the +plaintext+
     def encrypt(plaintext)
       return '' if plaintext.length == 0
 
@@ -93,9 +101,14 @@ module Crypt
       longs_to_str(v).unpack('a*').pack('m').delete("\n") # base64 encode it without newlines
     end
 
-    #
-    # decrypt: Use Corrected Block TEA to decrypt ciphertext using password
-    #
+    ##
+    # Decrypt the +ciphertext+ using the +key+
+    def self.decrypt(key, ciphertext)
+      self.new(key).decrypt(ciphertext)
+    end
+
+    ##
+    # Decrypt the +ciphertext+
     def decrypt(ciphertext)
       return '' if ciphertext.length == 0
 

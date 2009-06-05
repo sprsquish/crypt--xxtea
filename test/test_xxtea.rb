@@ -1,42 +1,62 @@
-$:.unshift File.dirname(__FILE__) + '/../lib'
+require 'rubygems'
+require 'minitest/spec'
+require File.join(File.dirname(__FILE__), *%w[.. lib crypt_tea])
 
-require 'test/unit'
-require 'crypt_tea'
+MiniTest::Unit.autorun
 
-class XXTEATest < Test::Unit::TestCase
-  def setup
-    @key = Crypt::XXTEA.new 'abigfattestkey'
+describe Crypt::XXTEA do
+  before do
+    @key_text = 'abigfattestkey'
+    @key = Crypt::XXTEA.new @key_text
     @plaintext = "Oh say can you see, by the dawn's early light"
     @cyphertext = "V32cYZc5yLXepm9lxzr4kgGM/eSVurwV0yQWi4uFs0uB2UBlJ19ZRKKMkbMr7DLGc3n1XQ=="
   end
 
-  def test_str_to_long
-    assert_equal [1953719668, 6778473, 7], Crypt::XXTEA.str_to_longs('testing', true)
+  it 'converts strings to longs' do
+    Crypt::XXTEA.str_to_longs('testing', true).must_equal [1953719668, 6778473, 7]
   end
 
-  def test_longs_to_str
-    assert_equal 'testing', Crypt::XXTEA.longs_to_str([1953719668, 6778473, 7], true)
+  it 'converts longs to strings' do
+    Crypt::XXTEA.longs_to_str([1953719668, 6778473, 7], true).must_equal 'testing'
   end
 
-  def test_key_length
-    assert_raise(RuntimeError) { Crypt::XXTEA.new '12345678901234567' }
-    assert_raise(RuntimeError) { Crypt::XXTEA.new '' }
+  it 'raises an error when the key is too long' do
+    proc { Crypt::XXTEA.new '12345678901234567' }.must_raise RuntimeError
   end
 
-  def test_encrypt
-    assert_equal @cyphertext, @key.encrypt(@plaintext)
+  it 'raises an error when the key is blank' do
+    proc { Crypt::XXTEA.new '' }.must_raise RuntimeError
   end
 
-  def test_decrypt
-    assert_equal @plaintext, @key.decrypt(@cyphertext)
+  it 'works properly with small keys' do
+    key = Crypt::XXTEA.new '123'
+    cyphertext = key.encrypt(@plaintext)
+    key.decrypt(cyphertext).must_equal @plaintext
   end
 
-  def test_tiny_plaintext
-    assert_equal '1', @key.decrypt(@key.encrypt('1'))
+  it 'properly encrypts when instantiated' do
+    @key.encrypt(@plaintext).must_equal @cyphertext
   end
 
-  def test_huge_plaintext
+  it 'properly decrypts when instantiated' do
+    @key.decrypt(@cyphertext).must_equal @plaintext
+  end
+
+  it 'properly en/decrypts tiny text' do
+    txt = '1'
+    @key.decrypt(@key.encrypt(txt)).must_equal txt
+  end
+
+  it 'properly en/decrypts huge text' do
     str = '1234567890' * 1_000
-    assert_equal str, @key.decrypt(@key.encrypt(str))
+    @key.decrypt(@key.encrypt(str)).must_equal str
+  end
+
+  it 'properly encrypts with a class method' do
+    Crypt::XXTEA.encrypt(@key_text, @plaintext).must_equal @cyphertext
+  end
+
+  it 'properly decrypts with a class method' do
+    Crypt::XXTEA.decrypt(@key_text, @cyphertext).must_equal @plaintext
   end
 end
