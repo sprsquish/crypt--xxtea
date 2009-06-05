@@ -1,19 +1,23 @@
 = Crypt::XXTEA
 
-* http://github.com/sprsquish/crypt--xxtea
+* http://crypt-tea.rubyforge.org/
 
 == DESCRIPTION:
 
-  An implementation of the Tiny Encryption Algorithm that's
-  compatible with PHP's xxTEA
-
-== REQUIREMENTS:
-
-* rubygems
+  An implementation of the Tiny Encryption Algorithm that's compatible with PHP's xxTEA
 
 == INSTALL:
 
 * sudo gem install crypt-tea
+
+== USAGE:
+
+  require 'rubygems'
+  require 'crypt-tea'
+  key = Crypt::XXTEA.new('super secret key')
+  plaintext = 'some text that needs to be encrypted'
+  cyphertext = key.encrypt(plaintext)
+  key.decrypt(cyphertext) == plaintext
 
 == LICENSE:
 
